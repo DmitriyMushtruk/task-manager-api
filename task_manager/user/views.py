@@ -15,7 +15,7 @@ class UserListViewSet(ListModelMixin, GenericViewSet):
     """
 
     serializer_class = serializers.UserSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = models.User.objects.all()
