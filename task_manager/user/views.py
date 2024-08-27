@@ -1,6 +1,7 @@
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet,ViewSet
+from rest_framework.permissions import IsAuthenticated
 
 from . import models
 
@@ -22,3 +23,14 @@ class UserListViewSet(ListModelMixin, GenericViewSet):
         if username:
             queryset = queryset.filter(username=username)
         return queryset
+
+
+class RegisterUserViewSet(CreateModelMixin, GenericViewSet):
+    """
+    Handles the creation of a new user.
+    User should have NOT Authenticated status.
+    """
+
+    queryset = models.User.objects.all()
+    serializer_class = serializers.UserRegistrationSerializer
+    permission_classes = [~IsAuthenticated]
