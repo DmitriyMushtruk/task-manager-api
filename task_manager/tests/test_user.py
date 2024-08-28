@@ -1,4 +1,5 @@
 import pytest
+from rest_framework.exceptions import ErrorDetail
 
 """Tests of /api/register/ endpoint."""
 
@@ -98,4 +99,54 @@ def test_register_password_confirmation(client, user_payload):
     assert response.status_code == 400
     assert "non_field_errors" in response.data
     assert "Passwords do not match." in response.data["non_field_errors"][0]
+
+
+"""Tests of /api/login/ endpoint."""
+
+
+@pytest.mark.django_db
+def test_login_successful(client, user):
+    """Test successful login action."""
+
+    response = client.post("/api/login/", dict(username=user.username, password="knight_pass"))
+
+    assert response.status_code == 200
+    assert "access" in response.data
+    assert "refresh" in response.data
+
+
+@pytest.mark.django_db
+def test_login_wrong_credentials(client, user):
+    """Checks login fails when an incorrect username and pass were given."""
+
+    response = client.post("/api/login/", dict(username=user.username.capitalize(), password="wrong_pass"))
+
+    assert response.status_code == 401
+    assert response.data["detail"] == "No active account found with the given credentials"
+
+
+@pytest.mark.django_db
+def test_login_all_fields_missing(client):
+    """
+    Checks if both username and pass were given.
+    """
+
+    response = client.post("/api/login/", {})
+
+    assert response.status_code == 400
+    assert response.data["username"][0] == "This field is required."
+    assert response.data["password"][0] == "This field is required."
+
+
+@pytest.mark.django_db
+def test_login_all_fields_empty(client):
+    """
+    Checks if both username and pass are not blank (empty).
+    """
+
+    response = client.post("/api/login/", dict(username="", password=""))
+
+    assert response.status_code == 400
+    assert response.data["username"][0] == "This field may not be blank."
+    assert response.data["password"][0] == "This field may not be blank."
 
