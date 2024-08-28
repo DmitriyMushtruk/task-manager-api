@@ -150,3 +150,47 @@ def test_login_all_fields_empty(client):
     assert response.data["username"][0] == "This field may not be blank."
     assert response.data["password"][0] == "This field may not be blank."
 
+
+"""Tests of /api/users/ endpoint."""
+
+
+@pytest.mark.django_db
+def test_get_users_success(client, user_payload_access_token, second_user):
+    """Test get user list with status 'authenticated'."""
+
+    response = client.get("/api/users/", HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}")
+
+    assert response.status_code == 200
+    assert len(response.data) == 2
+
+
+@pytest.mark.django_db
+def test_get_specific_user_success(client, user_payload_access_token, second_user):
+    """Test get specific user by username with status 'authenticated'."""
+
+    response = client.get(f"/api/users/?username={second_user.username}",
+                          HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}")
+
+    assert response.status_code == 200
+    assert len(response.data) == 1
+    assert response.data[0]["first_name"] == second_user.first_name
+    assert response.data[0]["last_name"] == second_user.last_name
+    assert response.data[0]["username"] == second_user.username
+
+
+@pytest.mark.django_db
+def test_get_users_fail(client):
+    """Test get user list without status 'authenticated'."""
+
+    response = client.get("/api/users/")
+
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_get_specific_user_fail(client, second_user):
+    """Test get specific user by username without status 'authenticated'."""
+
+    response = client.get(f"/api/users/?username={second_user.username}")
+
+    assert response.status_code == 401
