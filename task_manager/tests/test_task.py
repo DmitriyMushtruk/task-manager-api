@@ -202,3 +202,34 @@ def test_update_task_without_permissions(client, user_payload_access_token, task
 
     assert response.status_code == 403
 
+
+"""Tests of PATCH method to /api/task/ endpoint"""
+
+
+@pytest.mark.django_db
+def test_partial_update_success(client, user_payload_access_token, task_user):
+    """
+    Checks if status of task changing to 'completed' if this param was given.
+    """
+
+    response = client.patch(
+        f"/api/tasks/{task_user.id}/?completed",
+        HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}"
+    )
+
+    assert response.status_code == 200
+    assert response.data["status"] == "completed"
+
+
+@pytest.mark.django_db
+def test_partial_update_task_with_non_exist_id(client, user_payload_access_token, task_payload, task_user):
+    """Checks partial updating of task with non-exist id."""
+
+    response = client.patch(
+        f"/api/tasks/{int(task_user.id * 25)}/",
+        task_payload,
+        HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}"
+    )
+
+    assert response.status_code == 404
+
