@@ -27,7 +27,7 @@ class TaskViewSet(ModelViewSet):
         Allows to filter task list by fields: user_id, status.
         """
 
-        queryset = models.Task.objects.all()
+        queryset = models.Task.objects.all().order_by("status")
 
         filter_params = {}
         for param in ['user_id', 'status']:
@@ -36,7 +36,7 @@ class TaskViewSet(ModelViewSet):
                 filter_params[param] = value
 
         if filter_params:
-            queryset = queryset.filter(**filter_params)
+            queryset = queryset.filter(**filter_params).order_by("status")
 
         return queryset
 
