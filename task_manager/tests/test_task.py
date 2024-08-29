@@ -94,3 +94,49 @@ def test_get_task_list_without_authorization(client):
 
     assert response.status_code == 401
 
+
+"""Tests of POST method to /api/task/ endpoint"""
+
+
+@pytest.mark.django_db
+def test_create_task_success(client, user_payload_access_token, task_payload):
+    """Test if task was created correctly."""
+
+    response = client.post(f"/api/tasks/", task_payload, HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}")
+
+    assert response.status_code == 201
+    assert response.data["title"] == task_payload["title"]
+    assert response.data["description"] == task_payload["description"]
+    assert response.data["status"] == "new"
+
+
+@pytest.mark.django_db
+def test_create_task_without_title_field(client, user_payload_access_token, task_payload):
+    """Checks if user can create new task without title field."""
+
+    task_payload.pop("title")
+
+    response = client.post(f"/api/tasks/", task_payload, HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}")
+
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_task_with_wrong_status_field(client, user_payload_access_token, task_payload):
+    """Checks if user can create new task with wrong status field."""
+
+    task_payload["status"] = "wrong_status"
+
+    response = client.post(f"/api/tasks/", task_payload, HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}")
+
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_create_task_without_authorization(client, task_payload):
+    """Checks if user without authorization can create new task."""
+
+    response = client.post(f"/api/tasks/", task_payload)
+
+    assert response.status_code == 401
+
