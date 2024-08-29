@@ -45,3 +45,13 @@ class TaskViewSet(ModelViewSet):
 
         serializer.save(user_id=self.request.user)
 
+    def perform_update(self, serializer):
+        """
+        Override perform_update method.
+        If 'completed' param was given changes field 'status' of task into 'completed'.
+        """
+
+        if "completed" in self.request.query_params:
+            serializer.save(status="completed", partial=True)
+        else:
+            serializer.save()
