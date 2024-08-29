@@ -9,6 +9,12 @@ from . import serializers
 from . import permissions
 
 
+class TaskListPagination(PageNumberPagination):
+    page_size = 8
+    page_query_param = "page_size"
+    max_page_size = 10
+
+
 class TaskViewSet(ModelViewSet):
     serializer_class = serializers.TaskSerializer
     permission_classes = [IsAuthenticated, permissions.IsOwnerOrReadOnly]
