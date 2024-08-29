@@ -233,3 +233,52 @@ def test_partial_update_task_with_non_exist_id(client, user_payload_access_token
 
     assert response.status_code == 404
 
+
+"""Tests of DELETE method to /api/task/ endpoint"""
+
+
+@pytest.mark.django_db
+def test_delete_task_success(client, user_payload_access_token, task_user):
+    """Checks successful deleting of task."""
+
+    response = client.delete(
+        f"/api/tasks/{task_user.id}/",
+        HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}"
+    )
+
+    assert response.status_code == 204
+
+
+@pytest.mark.django_db
+def test_delete_task_without_permissions(client, user_payload_access_token, task_second_user):
+    """Checks deleting task without permissions."""
+
+    response = client.delete(
+        f"/api/tasks/{task_second_user.id}/",
+        HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}"
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_delete_task_without_authorization(client, task_user):
+    """Checks deleting task without authorization."""
+
+    response = client.delete(
+        f"/api/tasks/{task_user.id}/"
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_delete_task_with_non_exist_id(client, user_payload_access_token, task_user):
+    """Checks deleting task with non-exist id."""
+
+    response = client.delete(
+        f"/api/tasks/{int(task_user.id * 25)}/",
+        HTTP_AUTHORIZATION=f"Bearer {user_payload_access_token}"
+    )
+
+    assert response.status_code == 404
