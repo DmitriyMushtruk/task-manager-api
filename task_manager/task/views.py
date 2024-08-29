@@ -40,3 +40,8 @@ class TaskViewSet(ModelViewSet):
 
         return queryset
 
+    def perform_create(self, serializer):
+        """Automatically adds user_id field on task data with creating new task."""
+
+        serializer.save(user_id=self.request.user)
+
